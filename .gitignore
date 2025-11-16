@@ -4,6 +4,17 @@ env/
 ENV/
 .venv/
 
+# SQLite database
+*.db
+*.sqlite
+*.sqlite3
+
+# Frontend (Node/React)
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+node_modules/
+
 # Environment variables (API keys!)
 .env
 .env.local
