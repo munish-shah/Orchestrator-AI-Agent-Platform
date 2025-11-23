@@ -5,6 +5,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from core.run_tracker import RunTracker
 from core.tool_registry import ToolRegistry
+from core.model_config import get_model_id, DEFAULT_MODEL
 
 load_dotenv()
 
@@ -15,13 +16,14 @@ class AgentEngine:
     Executes agent loop while capturing all steps for inspection.
     """
     
-    def __init__(self, tracker: RunTracker, tool_registry: ToolRegistry):
+    def __init__(self, tracker: RunTracker, tool_registry: ToolRegistry, model_id: str = None):
         """
         Initialize agent engine.
         
         Args:
             tracker: RunTracker for capturing execution steps
             tool_registry: ToolRegistry for tool execution
+            model_id: Optional model ID override
         """
         self.tracker = tracker
         self.tool_registry = tool_registry
@@ -32,16 +34,18 @@ class AgentEngine:
             base_url=os.getenv("API_BASE_URL")
         )
         
-        self.model = os.getenv("MODEL", "gpt-4")
+        # Use provided model ID or fallback to default from config
+        self.model = model_id or get_model_id(DEFAULT_MODEL)
         self.max_iterations = int(os.getenv("MAX_ITERATIONS", "10"))
     
-    async def run(self, user_goal: str) -> str:
+    async def run(self, user_goal: str, allowed_tools: list[str] = None) -> str:
         """
         Execute agent loop with full tracking.
         This is the enhanced version of run_agent() from agent.py.
         
         Args:
             user_goal: User's question/request
+            allowed_tools: Optional list of tool names to enable for this run
             
         Returns:
             str: Final agent response
@@ -53,10 +57,36 @@ class AgentEngine:
         })
         
         # Initialize conversation
-        messages = [{"role": "user", "content": user_goal}]
+        system_prompt = (
+            "You are a helpful AI agent. "
+            "Use the provided tools to solve problems. "
+            "Do NOT invent new tools. Only use the tools explicitly provided to you. "
+            "When you have the answer, provide it directly in your response. "
+            "Do NOT use LaTeX formatting (e.g. $x$) for simple math. Use plain text."
+        )
+        
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_goal}
+        ]
         
         # Get tool schemas
-        tool_schemas = self.tool_registry.get_schemas()
+        # Get tool schemas
+        all_schemas = self.tool_registry.get_schemas()
+        
+        if allowed_tools and "auto" in allowed_tools:
+            # Auto mode: Use all tools, let agent decide
+            tool_schemas = all_schemas
+            tool_choice = "auto"
+        elif allowed_tools:
+            # Specific tools selected: Filter and force usage
+            tool_schemas = [s for s in all_schemas if s['function']['name'] in allowed_tools]
+            # Force tool usage if specific tools are requested
+            tool_choice = "required" if tool_schemas else "auto"
+        else:
+            # No tools selected: Disable tools
+            tool_schemas = None
+            tool_choice = None
         
         # Agent loop (same structure as agent.py)
         iteration = 0
@@ -65,15 +95,30 @@ class AgentEngine:
             
             try:
                 # Call LLM (same as agent.py)
+                # Only force tool usage on the first iteration if requested
+                current_tool_choice = tool_choice if iteration == 1 else "auto"
+                
                 response = self.client.chat.completions.create(
                     model=self.model,
                     messages=messages,
                     tools=tool_schemas,
+                    tool_choice=current_tool_choice,
                     stream=False
                 )
                 
                 assistant_message = response.choices[0].message
-                messages.append(assistant_message)
+                
+                # Handle compatibility: Ensure content is not None
+                # Some providers (like Gemini) require content field even for tool calls
+                msg_dict = {
+                    "role": assistant_message.role,
+                    "content": assistant_message.content if assistant_message.content is not None else ""
+                }
+                
+                if assistant_message.tool_calls:
+                    msg_dict["tool_calls"] = assistant_message.tool_calls
+                
+                messages.append(msg_dict)
                 
                 # Check if AI wants to use a tool
                 if assistant_message.tool_calls:

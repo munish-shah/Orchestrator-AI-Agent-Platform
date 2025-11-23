@@ -8,16 +8,7 @@ from models.tool import Tool
 from core.tool_registry import ToolRegistry
 
 router = APIRouter()
-# Initialize global registry (singleton pattern)
-_registry = None
-
-
-def get_registry():
-    """Get or create tool registry singleton"""
-    global _registry
-    if _registry is None:
-        _registry = ToolRegistry()
-    return _registry
+# No global registry to allow dynamic discovery
 
 
 class ToolUpdate(BaseModel):
@@ -35,7 +26,7 @@ async def list_tools(db: Session = Depends(get_db)):
     Returns:
         list: Tool metadata for list display
     """
-    registry = get_registry()
+    registry = ToolRegistry()
     tools_list = []
     
     for tool_id, tool_instance in registry.tools.items():
@@ -66,7 +57,7 @@ async def get_tool_schema(tool_id: str, db: Session = Depends(get_db)):
     Returns:
         dict: Complete tool information including schema
     """
-    registry = get_registry()
+    registry = ToolRegistry()
     tool = registry.get_tool(tool_id)
     
     if not tool:
@@ -106,7 +97,7 @@ async def update_tool(
     Returns:
         dict: Updated tool information
     """
-    registry = get_registry()
+    registry = ToolRegistry()
     
     # Verify tool exists in registry
     tool = registry.get_tool(tool_id)
@@ -151,7 +142,7 @@ async def get_tool_stats(db: Session = Depends(get_db)):
     Returns:
         dict: Tool statistics
     """
-    registry = get_registry()
+    registry = ToolRegistry()
     enabled_count = db.query(Tool).filter(Tool.enabled == True).count()
     disabled_count = db.query(Tool).filter(Tool.enabled == False).count()
     
@@ -160,4 +151,3 @@ async def get_tool_stats(db: Session = Depends(get_db)):
         "enabled": enabled_count if enabled_count > 0 else len(registry),
         "disabled": disabled_count
     }
-

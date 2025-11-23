@@ -15,6 +15,7 @@ class ChatRequest(BaseModel):
     """Request model for chat endpoint"""
     message: str
     model: str = None  # Optional model override
+    tools: list[str] = None  # Optional list of allowed tools
 
 
 class ChatResponse(BaseModel):
@@ -23,23 +24,19 @@ class ChatResponse(BaseModel):
     run_id: str
 
 
+from core.model_config import get_model_id, MODEL_MAPPINGS, DEFAULT_MODEL
+
+@router.get("/models")
+async def list_models():
+    """List available models"""
+    return {
+        "models": list(MODEL_MAPPINGS.keys()),
+        "default": DEFAULT_MODEL
+    }
+
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest, db: Session = Depends(get_db)):
     """
-    Main chat endpoint for Model Playground.
-    
-    Flow:
-    1. Create new Run
-    2. Initialize Agent Engine with RunTracker
-    3. Execute agent (tracks all steps)
-    4. Save Run to database
-    5. Return response and run_id
-    
-    Args:
-        request: ChatRequest with user message
-        db: Database session
-        
-    Returns:
         ChatResponse with agent response and run ID
     """
     # Create run
@@ -51,11 +48,15 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
     # Initialize components
     tracker = RunTracker(run)
     tool_registry = ToolRegistry()
-    engine = AgentEngine(tracker=tracker, tool_registry=tool_registry)
+    
+    # Resolve model ID
+    model_id = get_model_id(request.model) if request.model else None
+    
+    engine = AgentEngine(tracker=tracker, tool_registry=tool_registry, model_id=model_id)
     
     try:
         # Execute agent
-        response = await engine.run(request.message)
+        response = await engine.run(request.message, allowed_tools=request.tools)
         
         # Finalize run
         tracker.finalize("completed")

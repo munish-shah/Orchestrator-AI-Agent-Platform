@@ -1,10 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@500,600,700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Styles are handled by AgentPlatform.jsx GlobalStyles component */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* Font Imports */
+@layer base {
+  body {
+    @apply bg-background text-text font-sans antialiased;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-surface;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full hover:bg-primary/50 transition-colors;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-surface/80 backdrop-blur-xl border border-border shadow-xl shadow-black/20;
+  }
+
+  .glass-button {
+    @apply bg-surface-highlight/80 backdrop-blur-lg border border-border hover:bg-surface-highlight transition-all duration-300;
+  }
 }
