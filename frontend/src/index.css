@@ -10,6 +10,8 @@
 @layer base {
   body {
     @apply bg-background text-text font-sans antialiased;
+    background-image: radial-gradient(circle at 50% 0%, #1a1b26 0%, #030304 40%);
+    background-attachment: fixed;
   }
 
   /* Custom Scrollbar */
@@ -29,10 +31,10 @@
 
 @layer components {
   .glass-panel {
-    @apply bg-surface/80 backdrop-blur-xl border border-border shadow-xl shadow-black/20;
+    @apply bg-surface/70 backdrop-blur-2xl border border-white/5 shadow-2xl;
   }
 
   .glass-button {
-    @apply bg-surface-highlight/80 backdrop-blur-lg border border-border hover:bg-surface-highlight transition-all duration-300;
+    @apply bg-white/5 backdrop-blur-lg border border-white/10 hover:bg-white/10 transition-all duration-300;
   }
 }

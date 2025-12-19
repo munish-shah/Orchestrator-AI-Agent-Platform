@@ -3,7 +3,7 @@ import { Card } from '../components/ui/Card';
 
 export const Build = () => {
     return (
-        <div className="h-[calc(100vh-140px)] flex items-center justify-center">
+        <div className="h-full flex items-center justify-center p-4 pt-20 md:p-6 md:pt-24">
             <Card className="text-center max-w-md">
                 <div className="w-16 h-16 bg-surface-highlight rounded-full flex items-center justify-center mx-auto mb-6">
                     <span className="text-2xl">🚧</span>

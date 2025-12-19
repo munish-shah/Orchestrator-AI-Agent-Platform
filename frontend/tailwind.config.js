@@ -7,15 +7,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#0A0A0A',
-        surface: '#111111',
-        'surface-highlight': '#1C1C1C',
-        border: '#2A2A2A',
-        primary: '#3B82F6',
-        'primary-hover': '#2563EB',
-        secondary: '#8B5CF6',
-        text: '#F0F0F0',
-        'text-muted': '#888888',
+        background: '#030304', // Ink black
+        surface: '#0B0B0D', // Slightly lighter cool black
+        'surface-highlight': '#141417',
+        border: '#222226',
+        primary: '#6366F1', // Indigo
+        'primary-hover': '#4F46E5',
+        secondary: '#A855F7', // Purple
+        accent: '#06B6D4', // Cyan
+        text: '#EDEDEF',
+        'text-muted': '#8F9199',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

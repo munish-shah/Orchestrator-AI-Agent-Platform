@@ -7,51 +7,77 @@ const API_URL = 'http://localhost:8000/api';
 
 // --- Step Components ---
 
-const StepContainer = ({ children, icon: Icon, title, isLast }) => (
-    <div className="relative pl-12 pb-8 last:pb-0">
-        {/* Timeline Line */}
-        {!isLast && (
-            <div className="absolute left-[15px] top-8 bottom-0 w-0.5 bg-border" />
-        )}
+const StepContainer = ({ children, icon: Icon, title, isLast, color }) => {
+    const colorMap = {
+        blue: 'text-primary border-primary/30 bg-primary/10',
+        purple: 'text-secondary border-secondary/30 bg-secondary/10',
+        orange: 'text-orange-400 border-orange-400/30 bg-orange-400/10',
+        green: 'text-green-400 border-green-400/30 bg-green-400/10'
+    };
 
-        {/* Icon Bubble */}
-        <div className={`absolute left-0 top-0 w-8 h-8 rounded-full bg-surface border border-border flex items-center justify-center z-10 ring-4 ring-background`}>
-            <Icon className={`w-4 h-4 text-blue-500`} />
-        </div>
+    return (
+        <div className="relative pl-12 pb-12 last:pb-0">
+            {/* Timeline Line */}
+            {!isLast && (
+                <div className="absolute left-[15px] top-10 bottom-0 w-0.5 bg-gradient-to-b from-border to-transparent" />
+            )}
 
-        {/* Content */}
-        <div className="space-y-2">
-            <div className="flex items-center gap-2">
-                <span className={`text-xs font-bold font-mono uppercase text-blue-400`}>{title}</span>
-                <span className="text-[10px] text-text-muted bg-surface-highlight px-1.5 py-0.5 rounded">
-                    {new Date().toLocaleTimeString()}
-                </span>
+            {/* Icon Bubble */}
+            <div className={`
+                absolute left-0 top-0 w-8 h-8 rounded-full border flex items-center justify-center z-10 
+                bg-background shadow-[0_0_15px_-5px_rgba(0,0,0,0.5)]
+                ${color === 'blue' ? 'border-primary text-primary' : ''}
+                ${color === 'purple' ? 'border-secondary text-secondary' : ''}
+                ${color === 'orange' ? 'border-orange-400 text-orange-400' : ''}
+                ${color === 'green' ? 'border-green-400 text-green-400' : ''}
+            `}>
+                <Icon className="w-4 h-4" />
             </div>
-            {children}
+
+            {/* Content */}
+            <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                    <span className={`text-xs font-bold font-mono uppercase tracking-wider ${color === 'blue' ? 'text-primary' :
+                        color === 'purple' ? 'text-secondary' :
+                            color === 'orange' ? 'text-orange-400' :
+                                color === 'green' ? 'text-green-400' : 'text-text-muted'
+                        }`}>{title}</span>
+                    <span className="text-[10px] text-text-muted bg-white/5 px-2 py-0.5 rounded-full border border-white/5">
+                        {new Date().toLocaleTimeString()}
+                    </span>
+                </div>
+                <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="glass-panel rounded-xl overflow-hidden"
+                >
+                    {children}
+                </motion.div>
+            </div>
         </div>
+    );
+};
+
+const UserRequestStep = ({ content }) => (
+    <div className="p-4 bg-primary/5">
+        <p className="text-sm text-text font-medium">{content}</p>
     </div>
 );
 
-const UserRequestStep = ({ content }) => (
-    <Card className="bg-primary/5 border-primary/20 p-4">
-        <p className="text-sm text-text">{content}</p>
-    </Card>
-);
-
 const AgentThoughtStep = ({ content }) => (
-    <div className="bg-surface border border-border rounded-lg p-3">
-        <p className="text-xs text-text-muted font-mono whitespace-pre-wrap">{content}</p>
+    <div className="p-4 bg-secondary/5">
+        <p className="text-xs text-text-muted font-mono whitespace-pre-wrap leading-relaxed">{content}</p>
     </div>
 );
 
 const ToolCallStep = ({ toolName, params }) => (
-    <div className="bg-surface border border-blue-500/30 rounded-lg overflow-hidden">
-        <div className="bg-blue-500/10 px-3 py-2 border-b border-blue-500/20 flex items-center gap-2">
-            <IconCalculator className="w-3 h-3 text-blue-400" />
-            <span className="text-xs font-medium text-blue-300">Executing: {toolName}</span>
+    <div>
+        <div className="px-4 py-2 border-b border-white/5 flex items-center gap-2 bg-white/5">
+            <IconCalculator className="w-3 h-3 text-orange-400" />
+            <span className="text-xs font-bold text-orange-300">Tool Call: {toolName}</span>
         </div>
-        <div className="p-3 bg-black/20">
-            <pre className="text-[10px] text-text-muted font-mono overflow-x-auto">
+        <div className="p-4 bg-black/20">
+            <pre className="text-[10px] text-text-muted font-mono overflow-x-auto custom-scrollbar">
                 {JSON.stringify(params, null, 2)}
             </pre>
         </div>
@@ -59,13 +85,13 @@ const ToolCallStep = ({ toolName, params }) => (
 );
 
 const ToolResultStep = ({ toolName, result }) => (
-    <div className="bg-surface border border-green-500/30 rounded-lg overflow-hidden">
-        <div className="bg-green-500/10 px-3 py-2 border-b border-green-500/20 flex items-center gap-2">
+    <div>
+        <div className="px-4 py-2 border-b border-white/5 flex items-center gap-2 bg-green-500/5">
             <IconCheck className="w-3 h-3 text-green-400" />
-            <span className="text-xs font-medium text-green-300">Result: {toolName}</span>
+            <span className="text-xs font-bold text-green-300">Output: {toolName}</span>
         </div>
-        <div className="p-3 bg-black/20">
-            <pre className="text-[10px] text-text-muted font-mono overflow-x-auto">
+        <div className="p-4 bg-black/20">
+            <pre className="text-[10px] text-text-muted font-mono overflow-x-auto custom-scrollbar">
                 {result}
             </pre>
         </div>
@@ -73,14 +99,14 @@ const ToolResultStep = ({ toolName, result }) => (
 );
 
 const AgentResponseStep = ({ content }) => (
-    <Card className="bg-surface-highlight border-border p-4">
+    <div className="p-4 bg-primary/5">
         <div className="flex items-start gap-3">
             <div className="flex-shrink-0 mt-1">
-                <IconOrchestratorLogo className="w-5 h-5" />
+                <IconOrchestratorLogo className="w-5 h-5 text-primary" />
             </div>
-            <p className="text-sm text-text break-words min-w-0 flex-1">{content}</p>
+            <p className="text-sm text-text break-words min-w-0 flex-1 leading-relaxed">{content}</p>
         </div>
-    </Card>
+    </div>
 );
 
 export const Runs = () => {
@@ -153,7 +179,7 @@ export const Runs = () => {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-140px)]">
+        <div className="h-full grid grid-cols-1 lg:grid-cols-3 gap-6 p-4 pt-20 md:p-6 md:pt-24 overflow-hidden">
             {/* Runs List */}
             <Card className="lg:col-span-1 p-0 overflow-hidden flex flex-col">
                 <div className="p-4 border-b border-border bg-surface/50 backdrop-blur-sm">

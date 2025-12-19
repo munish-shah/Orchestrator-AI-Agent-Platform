@@ -13,36 +13,37 @@ const MessageBubble = ({ role, content, runId }) => {
         <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-6`}
+            className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-8`}
         >
-            <div className={`flex gap-3 max-w-3xl ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+            <div className={`flex gap-4 max-w-4xl ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
                 {/* Avatar */}
                 <div className={`
-          w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 border
+          w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg
           ${isUser
-                        ? 'bg-primary border-primary text-white'
-                        : 'bg-surface border-border text-primary'
+                        ? 'bg-gradient-to-br from-primary to-secondary text-white ring-2 ring-primary/20'
+                        : 'bg-surface-highlight border border-white/10 text-primary ring-2 ring-white/5'
                     }
         `}>
                     {isUser ? (
-                        <span className="text-xs font-bold">U</span>
+                        <span className="text-sm font-bold">U</span>
                     ) : (
-                        <IconOrchestratorLogo className="w-5 h-5" />
+                        <IconOrchestratorLogo className="w-6 h-6" />
                     )}
                 </div>
 
                 {/* Content */}
                 <div className={`
-          p-4 rounded-2xl shadow-sm border
+          p-6 rounded-3xl shadow-xl backdrop-blur-sm transition-all duration-300
           ${isUser
-                        ? 'bg-primary text-white border-primary rounded-tr-none'
-                        : 'bg-surface text-text border-border rounded-tl-none'
+                        ? 'bg-gradient-to-br from-primary/90 to-primary/80 text-white rounded-tr-sm shadow-primary/10 hover:shadow-primary/20'
+                        : 'bg-white/5 border border-white/5 text-text rounded-tl-sm shadow-black/20 hover:bg-white/10'
                     }
         `}>
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed">{content}</p>
+                    <p className={`whitespace-pre-wrap text-base font-light leading-relaxed ${isUser ? 'text-white/95' : 'text-text/90'}`}>{content}</p>
                     {runId && (
-                        <div className="mt-2 pt-2 border-t border-white/10 flex items-center gap-1 opacity-60">
-                            <span className="text-[10px] font-mono uppercase tracking-wider">Run ID: {runId.substring(0, 8)}</span>
+                        <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-2 opacity-50 group hover:opacity-100 transition-opacity">
+                            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
+                            <span className="text-[10px] font-mono uppercase tracking-wider">Run ID: <span className="text-accent">{runId.substring(0, 8)}</span></span>
                         </div>
                     )}
                 </div>
@@ -146,7 +147,7 @@ export const Playground = () => {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-140px)]">
+        <div className="h-full flex flex-col lg:grid lg:grid-cols-4 gap-6 p-4 pt-20 md:p-6 md:pt-24 overflow-hidden">
             {/* Chat Area */}
             <Card className="lg:col-span-3 flex flex-col p-0 overflow-hidden border-primary/20">
                 {/* Messages */}
@@ -177,66 +178,102 @@ export const Playground = () => {
                 </div>
 
                 {/* Input Area */}
-                <div className="p-4 bg-surface/50 border-t border-border backdrop-blur-md">
-                    {/* Tool Selector Bar */}
-                    <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-2">
-                        <button
-                            onClick={() => setShowToolSelector(!showToolSelector)}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${showToolSelector || selectedTools.length > 0
-                                ? 'bg-primary/20 border-primary text-primary'
-                                : 'bg-surface border-border text-text-muted hover:text-text'
-                                }`}
+                <div className="p-6 bg-transparent relative z-20">
+                    <div className="max-w-4xl mx-auto space-y-4">
+                        {/* Tool Selector Chips */}
+                        <motion.div
+                            layout
+                            className="flex flex-wrap items-center gap-2 justify-center"
                         >
-                            <IconBrain className="w-3 h-3" />
-                            {selectedTools.length > 0 ? `${selectedTools.length} Tools Active` : 'Add Tools'}
-                        </button>
+                            <button
+                                onClick={() => setShowToolSelector(!showToolSelector)}
+                                className={`
+                                    flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold tracking-wide uppercase transition-all duration-300 border
+                                    ${showToolSelector || selectedTools.length > 0
+                                        ? 'bg-primary/20 border-primary/50 text-white shadow-[0_0_15px_-3px_rgba(99,102,241,0.4)]'
+                                        : 'bg-white/5 border-white/10 text-text-muted hover:bg-white/10 hover:border-white/20 hover:text-white'
+                                    }
+                                `}
+                            >
+                                <IconBrain className={`w-4 h-4 ${showToolSelector ? 'animate-pulse' : ''}`} />
+                                {selectedTools.length > 0 ? `${selectedTools.length} Active` : 'Tools'}
+                            </button>
 
-                        {showToolSelector && (
-                            <>
-                                <button
-                                    onClick={() => toggleTool('auto')}
-                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${selectedTools.includes('auto')
-                                        ? 'bg-purple-500/20 border-purple-500 text-purple-400'
-                                        : 'bg-surface border-border text-text-muted hover:border-text-muted'
-                                        }`}
+                            <AnimatePresence>
+                                {showToolSelector && (
+                                    <>
+                                        <motion.button
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.9 }}
+                                            onClick={() => toggleTool('auto')}
+                                            className={`
+                                                flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors
+                                                ${selectedTools.includes('auto')
+                                                    ? 'bg-secondary/20 border-secondary text-secondary shadow-[0_0_10px_-2px_rgba(168,85,247,0.4)]'
+                                                    : 'bg-surface border-border text-text-muted hover:border-text-muted'
+                                                }
+                                            `}
+                                        >
+                                            Auto Mode
+                                        </motion.button>
+                                        {availableTools.map(tool => (
+                                            <motion.button
+                                                key={tool.id}
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                exit={{ opacity: 0, scale: 0.9 }}
+                                                onClick={() => toggleTool(tool.id)}
+                                                className={`
+                                                    flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors
+                                                    ${selectedTools.includes(tool.id)
+                                                        ? 'bg-accent/20 border-accent text-accent shadow-[0_0_10px_-2px_rgba(6,182,212,0.4)]'
+                                                        : 'bg-surface border-border text-text-muted hover:border-text-muted'
+                                                    }
+                                                `}
+                                            >
+                                                {tool.name}
+                                            </motion.button>
+                                        ))}
+                                    </>
+                                )}
+                            </AnimatePresence>
+                        </motion.div>
+
+                        {/* Input Bar */}
+                        <div className="relative group">
+                            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+                            <div className="relative flex items-center bg-surface border border-white/10 rounded-2xl p-2 shadow-2xl">
+                                <input
+                                    type="text"
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                                    placeholder="Type a command or ask a question..."
+                                    disabled={loading}
+                                    className="flex-1 bg-transparent border-none px-4 py-3 text-text placeholder:text-text-muted focus:ring-0 focus:outline-none text-base"
+                                />
+                                <Button
+                                    onClick={sendMessage}
+                                    disabled={loading || !input.trim()}
+                                    className={`
+                                        ml-2 px-4 py-2 rounded-xl transition-all duration-300
+                                        ${input.trim()
+                                            ? 'bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/30'
+                                            : 'bg-white/5 text-text-muted cursor-not-allowed'
+                                        }
+                                    `}
                                 >
-                                    {selectedTools.includes('auto') && <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />}
-                                    Auto
-                                </button>
-                                {availableTools.map(tool => (
-                                    <button
-                                        key={tool.id}
-                                        onClick={() => toggleTool(tool.id)}
-                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${selectedTools.includes(tool.id)
-                                            ? 'bg-blue-500/20 border-blue-500 text-blue-400'
-                                            : 'bg-surface border-border text-text-muted hover:border-text-muted'
-                                            }`}
-                                    >
-                                        {selectedTools.includes(tool.id) && <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />}
-                                        {tool.name}
-                                    </button>
-                                ))}
-                            </>
-                        )}
-                    </div>
+                                    <IconSend className={`w-5 h-5 ${loading ? 'animate-pulse' : ''}`} />
+                                </Button>
+                            </div>
+                        </div>
 
-                    <div className="flex gap-3 max-w-4xl mx-auto">
-                        <input
-                            type="text"
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                            placeholder="Command your agent..."
-                            disabled={loading}
-                            className="flex-1 bg-background border border-border rounded-xl px-4 py-3 text-text placeholder:text-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                        />
-                        <Button
-                            onClick={sendMessage}
-                            disabled={loading || !input.trim()}
-                            className="px-6"
-                        >
-                            <IconSend className="w-5 h-5" />
-                        </Button>
+                        <div className="text-center">
+                            <p className="text-[10px] text-text-muted uppercase tracking-widest font-mono opacity-50">
+                                AI Orchestrator v1.0 • Local Execution
+                            </p>
+                        </div>
                     </div>
                 </div>
             </Card>

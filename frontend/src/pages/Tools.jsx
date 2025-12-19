@@ -64,7 +64,7 @@ export const Tools = () => {
     }, [selectedToolId]);
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-140px)]">
+        <div className="h-full grid grid-cols-1 lg:grid-cols-3 gap-8 p-4 pt-20 md:p-6 md:pt-24 overflow-hidden">
             {/* Tool Grid */}
             <div className="lg:col-span-1 space-y-4 overflow-y-auto pr-2">
                 <h2 className="font-display font-bold text-xl mb-6">Available Tools</h2>

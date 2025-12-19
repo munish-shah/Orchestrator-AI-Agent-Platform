@@ -64,52 +64,57 @@ export const Dashboard = ({ onNavigate }) => {
             });
     }, []);
 
+    const connected = true; // Hardcoded for now, or fetch from health check
+
     return (
-        <div className="space-y-8">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-display font-bold text-text">System Overview</h1>
-                    <p className="text-text-muted mt-1">Welcome back, Admin. All systems operational.</p>
+        <div className="h-full overflow-y-auto p-4 pt-20 md:p-8 md:pt-24 scroll-smooth">
+            <div className="max-w-7xl mx-auto space-y-6">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h1 className="text-3xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+                            Command Center
+                        </h1>
+                        <p className="text-text-muted mt-1">System status and agent metrics.</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-border hover:bg-surface-highlight transition-colors text-sm font-medium">
+                            <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                            {connected ? 'System Online' : 'Offline'}
+                        </button>
+                    </div>
                 </div>
-                <div className="flex gap-3">
-                    <Button variant="secondary" size="sm" onClick={() => onNavigate('inspect')}>View Logs</Button>
-                    <Button variant="primary" size="sm" onClick={() => onNavigate('playground')}>
-                        <IconChat className="w-4 h-4" />
-                        New Chat
-                    </Button>
-                </div>
-            </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <StatCard label="Total Runs" value={loading ? "-" : stats.total} trend={null} trendUp={true} />
-                <StatCard label="Active Agents" value={loading ? "-" : stats.active} trend={null} trendUp={true} />
-                <StatCard label="Success Rate" value={loading ? "-" : `${stats.successRate}%`} trend={null} trendUp={true} />
-            </div>
-
-            {/* Quick Actions */}
-            <div>
-                <h2 className="text-lg font-semibold text-text mb-4">Quick Actions</h2>
+                {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <ActionCard
-                        title="Launch Playground"
-                        description="Test your agents with real-time chat and debugging."
-                        icon={IconChat}
-                        onClick={() => onNavigate('playground')}
-                    />
-                    <ActionCard
-                        title="Inspect History"
-                        description="Deep dive into past execution traces and logs."
-                        icon={IconInspect}
-                        onClick={() => onNavigate('inspect')}
-                    />
-                    <ActionCard
-                        title="Build Workflow"
-                        description="Design new agent behaviors visually."
-                        icon={IconNodes}
-                        onClick={() => onNavigate('build')}
-                    />
+                    <StatCard label="Total Runs" value={loading ? "-" : stats.total} trend={null} trendUp={true} />
+                    <StatCard label="Active Agents" value={loading ? "-" : stats.active} trend={null} trendUp={true} />
+                    <StatCard label="Success Rate" value={loading ? "-" : `${stats.successRate}%`} trend={null} trendUp={true} />
+                </div>
+
+                {/* Quick Actions */}
+                <div>
+                    <h2 className="text-lg font-semibold text-text mb-4">Quick Actions</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <ActionCard
+                            title="Launch Playground"
+                            description="Test your agents with real-time chat and debugging."
+                            icon={IconChat}
+                            onClick={() => onNavigate('playground')}
+                        />
+                        <ActionCard
+                            title="Inspect History"
+                            description="Deep dive into past execution traces and logs."
+                            icon={IconInspect}
+                            onClick={() => onNavigate('inspect')}
+                        />
+                        <ActionCard
+                            title="Build Workflow"
+                            description="Design new agent behaviors visually."
+                            icon={IconNodes}
+                            onClick={() => onNavigate('build')}
+                        />
+                    </div>
                 </div>
             </div>
         </div>
